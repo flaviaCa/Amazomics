@@ -35,7 +35,7 @@ strain_df_long <- gather(strain_df, variable, measurement, c(gam_dens_s_low,gam_
 n_per_strain <- fq_strain
 n_per_strain$n_per_strain <- as.integer(round(H*n_per_strain$fq_strain))
 
-# If the total number of infections, as the sum of infections of different genotype according to defined frequency, is not exactly equald the number of host: 
+# If the total number of infections, as the sum of infections of different genotype according to defined frequency, is not exactly equal the number of host: 
 if(sum(n_per_strain$n_per_strain)!=H){
   # change the number of infected host with the dominant strain 
   dom_inf <- as.numeric(row.names(n_per_strain)[n_per_strain$n_per_strain==max(n_per_strain$n_per_strain)])
@@ -55,7 +55,7 @@ n_s <- merge(n_s,strain_df %>% group_by(strain,COI) %>% select(strain,COI,age_tr
 # Expected number of cleared infections at each time step (when population is untreated)
 E_ended_inf <- round(H/keep_min_length)
 
-# Increase infectivtity by assumed fraction super-infection
+# Increase infectivity by assumed fraction super-infection
 FOI <- E_ended_inf*(1+p_superInf)
 
 # ---------------------------------------  Initialize infections  ---------------------------------------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ out_df[it,2:(H+1),"gam_dens_s_high_treated"] <- sapply(2:(H+1),match_high_gam_tr
 
 # ---------------------------------------  Initialize infected mosquito before start of simulation  ---------------------------------------------------------------------------------------------------------------------
 
-# account for all infections that happened until 15 days prior the infection, so that we can add them once we  start simulation
+# account for all infections that happened until 15 days prior the infection, so that we can add them once we start simulation
 
 # data.frame to store new infections:
 new_inf <- data.frame(matrix(ncol = 2, nrow = A*I))

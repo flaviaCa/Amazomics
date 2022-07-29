@@ -8,18 +8,18 @@
 
 fct_infect_mosq_per_host <- function(new_host,infection_df){
   
-  # create a vector of all mosquitos available for the selected hosts
+  # create a vector of all mosquito available for the selected hosts
   all_mosq <- data.frame(matrix(ncol = 3, nrow = sum(as.numeric(new_host$n_mosq))))
   colnames(all_mosq) <- c("strain", "host","transmission")
   # assign host host ID for each mosquito
   all_mosq$host <-   unlist(apply(new_host,1,function(x) rep(x["Host_ID"],as.numeric(x["n_mosq"]))))
-  # randomly assign new infections to mosquitos, from the pool of availble mosquitos among the hosts:
+  # randomly assign new infections to mosquito, from the pool of available mosquito among the hosts:
   all_mosq$strain[sample(1:nrow(all_mosq),min(nrow(all_mosq),nrow(infection_df)),replace=F)] <- infection_df$strain[sample(1:nrow(infection_df),min(nrow(all_mosq),nrow(infection_df)),replace=F)]
   
   # keep only the mosquitos that carry an infection,
   all_mosq$transmission <- 1 
   all_mosq <- as.data.frame(all_mosq[!is.na(all_mosq$strain),] %>% 
-                              # change to wide data frame with rows each host to infect, and columns (n=3) the number of mosquitos infected with either S_high, Slow, S_mix
+                              # change to wide data frame with rows each host to infect, and columns (n=3) the number of mosquito infected with either S_high, Slow, S_mix
                               group_by(strain,host) %>% summarise(transmission = n(), .groups = 'drop')%>% spread(strain,transmission))
   
   
@@ -43,7 +43,7 @@ fct_infect_mosq_per_host <- function(new_host,infection_df){
   all_mosq$strain[all_mosq$S_low>=1 & is.na(all_mosq$S_high) & is.na(all_mosq$S_mix)] <- "S_low" 
   all_mosq$strain[all_mosq$S_mix>=1] <- "S_mix"
 
-  # determine if the each host has a single infection (ie clonal only one mosquito) or a super-infection (ie coinfect, at least two mosquitos infecting the same host)
+  # determine if the each host has a single infection (ie clonal only one mosquito) or a super-infection (ie coinfect, at least two mosquito infecting the same host)
   all_mosq$COI[all_mosq$strain=="S_mix"] <- "coinfect"
   all_mosq$COI[all_mosq$strain=="S_mix" & is.na(all_mosq$S_high) & is.na(all_mosq$S_low) & all_mosq$S_mix==1] <- "clonal"
   all_mosq$COI[all_mosq$S_high>1 & all_mosq$strain=="S_high"] <- "coinfect"

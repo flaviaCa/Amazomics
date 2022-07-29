@@ -1,3 +1,5 @@
+# ---------------------------------------  fct_transmission_host_to_mosq.R  ---------------------------------------------------------------------------------------------------------------------
+
 # for an infectious host, calculate the number of infections transmitted to mosquitos at a given time step
 # inputs are infection characteristics for a given host at current time-step:
 #   total infectiousness;
@@ -21,7 +23,7 @@ fct_transmission_host_to_mosq <- function(new_inf,infect_tot,G1,G2,lag_days=17,n
       # there is a shortcut here, as we directly count how many of the (n_spz=10) sporozoites will be passed from the mosquito to the newly infected human 
       trans_s1 <- rbinom(size=n_spz,n=1,p = G1/(G1+G2))
       trans_s2 <- n_spz-trans_s1
-      # according to the parasites that will be tramsitted, determine if the infection is monoclonal S_high or S_low, or polyclonal S_mix
+      # according to the parasites that will be transmitted, determine if the infection is monoclonal S_high or S_low, or polyclonal S_mix
       if(trans_s1>0&trans_s2==0){
         name_strain <- "S_low"
       }else{

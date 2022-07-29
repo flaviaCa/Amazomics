@@ -6,7 +6,7 @@ library(tidyr)
 library(dplyr)
 
 # ------ LOAD FUNCTIONS ------------------------------------------------------------------------------------
-source(file=paste("~/Functions/fct_wih_DE.R",sep=""))
+source(file=paste(getwd(),"/Functions/fct_wih_DE.R",sep=""))
 
 # ------ SET PARAMETERS ------------------------------------------------------------------------------------
 
@@ -27,17 +27,17 @@ q <- 0.285        #    :   decay rate of innate-immunity effectors
 p <- 0.50         #    :   decay rate of mature gametocytes
 
 fact_G <- 0       #   :   effect of treatment on gametocytes
-P_f <- 10^3.5     #   :   threshold of fever, and thus of treatment - asexual parasite density - random value!
+P_f <- 10^3.5     #   :   threshold of fever, and thus of treatment - asexual parasite density
 
 # Define varying parameters:
-factor_CR <- seq(0,1,by=.25)
+factor_CR <- seq(0,1,by=.1)
 #    :   Cross reactivity, i.e how much does the immune response of one strain affect the other strain (factor between 0 and 1)
 factor_activation <- 0.5*factor_CR
 #    :   Cross reactivity of immune stimulation, i.e how much does one strain stimulate the immune response to the other strain  (factor between 0 and 1)
-tau_all <- 9 #c(6,9) #    :   development time of gametocytes, ie number of days seuqestered before released in the blood stream
+tau_all <- 9 #    :   development time of gametocytes, ie number of days sequestered before released in the blood stream
 z_u_all <- seq(0.01,0.3,by=.01)
 #    :   daily conversion rate of asexual forms to gametocytes
-fact_G_all <- 0 #c(0,0.25,0.5,1)
+fact_G_all <- 0 
 #    :   effect of treatment on gametocytes (between 0 and 1)
 
 # initial conditions:
@@ -54,7 +54,7 @@ state_one_inf <- c(M = c(0.01,0), G = c(0,0) , J = c(0,0) , I = 0 ) # initial fo
 
 sim <- 1
 switch <- 0
-t_treat <- 250 # which day is the day the infecrtion reaches the given threshold, so here no treatment
+t_treat <- 250 # which day is the day the infection reaches the given threshold, so here no treatment
 
 # create empty dataframe to store outputs
 out <- data.frame(sim = integer(), tau_1 = numeric(), tau_2 = numeric(), z_1 = numeric(), z_2 = numeric(),CR.factor = numeric(),  timing_second_inf = numeric(),
@@ -66,7 +66,7 @@ out <- data.frame(sim = integer(), tau_1 = numeric(), tau_2 = numeric(), z_1 = n
 b_uv <- b_uv_fullCR # only one infection, thus cross-reactivity doesn't matter
 r_uv <- r_uv_fullCR # only one infection, thus cross-reactivity doesn't matter
 
-for(lag in 1:length(tau_all)){ # gametocyte developement time
+for(lag in 1:length(tau_all)){ # gametocyte development time
   for(z in 1:length(z_u_all)){ # sexual conversion rate
     tau1 <- tau_all[lag]
     tau2 <- tau_all[lag]
@@ -74,7 +74,7 @@ for(lag in 1:length(tau_all)){ # gametocyte developement time
     time_intro <- c(0,tail(time,1)+1) # second infection doesn't occur
     
     # run the diff. equation solver
-    yout <- dede(y = state_one_inf, times = time, func = wih_tau_kill, parms = NULL)
+    yout <- dede(y = state_one_inf, times = time, func = fct_wih_DE, parms = NULL)
     
     # store the outputs, including parameter values
     temp <- as.data.frame(yout)
@@ -105,7 +105,7 @@ for(cr in 1:length(factor_CR)){ # cross reactivivity
           tau2 <- tau_all[lag2]
           time_intro <- c(0,0) # introduction time of both strains
           # run the diff. equation solver
-          yout <- dede(y = state, times = time, func = wih_tau_kill, parms = NULL)
+          yout <- dede(y = state, times = time, func = fct_wih_DE, parms = NULL)
           
           # store the outputs, including parameter values
           temp <- as.data.frame(yout)
@@ -119,6 +119,7 @@ for(cr in 1:length(factor_CR)){ # cross reactivivity
           temp$CR.factor <- factor_CR[cr]
           out <- rbind(out,temp)
           sim <- sim+1
+         # } # z1 >= z2
         }# sexual conversion rate of strain 2
       }# sexual conversion rate of strain 1
     } # gametocyte development time for strain 2
@@ -129,7 +130,7 @@ out$treat <-0
 out$fact_G_treat <- "no.tmt"
 
 # ------ RUN MODEL WITH TREATMENT ------------------------------------------------------------------------------------
-
+switch <- 0
 # create empty dataframe to store outputs
 out_treat <- data.frame(sim = integer(), tau_1 = numeric(), tau_2 = numeric(), z_1 = numeric(), z_2 = numeric(),CR.factor = numeric(),  timing_second_inf = numeric(),
                         time = integer(), M1= numeric(), M2= numeric(), G1= numeric(), G2= numeric(),J1 = numeric(),J2= numeric(),age_treat = integer(),fact_G_treat = numeric())
@@ -189,10 +190,10 @@ for(cr in 1:length(factor_CR)){ # cross reactivivity
             tau1 <- tau_all[lag1]
             tau2 <- tau_all[lag2]
             time_intro <- c(0,0) # time of introduction of each strain
-            # when is the treatment threshold reahced?
+            # when is the treatment threshold reached?
             t_treat <- as.numeric(treat_time %>% filter(tau_1==tau1 & tau_2==tau2 & z_1==z_u[1] & z_2==z_u[2] & CR.factor == factor_CR[cr]) %>% select(time_treat))
             # run the diff. equation solver
-            yout <- dede(y = state, times = time, func = wih_tau_kill, parms = NULL)
+            yout <- dede(y = state, times = time, func = fct_wih_DE, parms = NULL)
             # store the outputs, including parameter values
             temp <- as.data.frame(yout)
             temp$sim <- sim
@@ -264,4 +265,4 @@ long_out <- rbind(long_out,long_out_treat)
 
 # ------ SAVE OUTPUT ------------------------------------------------------------------------------------
 
-save(out_all,long_out,file=paste("~/Within-host-dynamics/out_within-hosts_",Sys.Date(),".Rdata",sep=""))
+save(long_out,file=paste(getwd(),"/Within-host-dynamics/out_within-hosts_full_params_manyCR.Rdata",sep=""))

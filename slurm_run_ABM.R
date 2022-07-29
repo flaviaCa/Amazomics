@@ -14,7 +14,7 @@ library(reshape2)
 
 # ---------------------------------------  Define paths  ---------------------------------------------------------------------------------------------------------------------
 
-main_dir <- "/n/home09/fcamponovo/Conversion-selection/"
+main_dir <- "/main_folder"
 main_dir_code <- paste(main_dir,"code/",sep="")
 main_dir_analyis <- paste(main_dir,"Analysis/",sep="")
 
@@ -94,6 +94,4 @@ source(paste(main_dir_code,"/main.R",sep=""))
 
 # ---------------------------------------  Store output  ---------------------------------------------------------------------------------------------------------------------
 
-#out_n %>% mutate_if(is.factor, as.character) -> out_n
-#save(out_n,strain_df,n_s,treated_cleared, file = paste(main_output_dir,"/out_ABM_CoInf_",p_superInf,"pLow",prop_low_strain,"_Tmt_",P_tmt,"seed",seed,"_",Sys.Date(),".Rdata",sep=""))
 save(n_inf,strain_df,n_s,treated_cleared,FOI,track_mosq, file = paste(secondary_folder,"/aggregated_out_ABM_CoInf_",p_superInf,"pLow",prop_low_strain,"_Tmt_",P_tmt,"seed",seed,"_",Sys.Date(),".Rdata",sep=""))
